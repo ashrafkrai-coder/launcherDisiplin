@@ -1,0 +1,22 @@
+{
+  "name": "Portal Aplikasi",
+  "short_name": "Portal",
+  "description": "Pelancar semua aplikasi sekolah",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#060a1c",
+  "theme_color": "#0a1230",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "myDisiplin", "url": "./index.html?open=mydisiplin" },
+    { "name": "Lewat Hadir", "url": "./index.html?open=lewat-hadir" },
+    { "name": "Rampas HP", "url": "./index.html?open=rampas-hp" },
+    { "name": "myTugas", "url": "./index.html?open=mytugas" }
+  ]
+}

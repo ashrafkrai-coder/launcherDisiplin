@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1230">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Portal Aplikasi</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+  /* Gaya launcher 3D — latar angkasa, aksen neon cyan/biru, ikon bulat berwarna */
+  :root{
+    --accent:#00e5ff;--accent2:#2f7bff;--grad:linear-gradient(135deg,#00e5ff,#2f7bff);
+    --bg:#eaf3ff;
+    --bg-img:radial-gradient(1200px 600px at 15% -10%,rgba(0,229,255,.28),transparent 60%),
+             radial-gradient(900px 600px at 110% 110%,rgba(124,77,255,.22),transparent 60%),
+             linear-gradient(180deg,#eef6ff,#dfeaff);
+    --card:rgba(255,255,255,.62);--card-hover:rgba(255,255,255,.85);--line:rgba(47,123,255,.16);
+    --text:#0b1a3a;--muted:rgba(11,26,58,.58);
+    --chip:rgba(255,255,255,.6);--chip-on-bg:var(--grad);--chip-on:#fff;
+    --bar:rgba(255,255,255,.55);
+    --shadow:0 4px 18px rgba(47,123,255,.10);
+    --shadow-hover:0 10px 30px rgba(47,123,255,.22);
+    --glow:0 0 0 1px rgba(0,229,255,.45),0 10px 34px rgba(0,180,255,.30);
+    --stars:none;
+  }
+  [data-theme="dark"]{
+    --bg:#060a1c;
+    --bg-img:radial-gradient(1000px 520px at 20% -10%,rgba(0,170,255,.30),transparent 60%),
+             radial-gradient(800px 600px at 105% 105%,rgba(124,77,255,.30),transparent 60%),
+             radial-gradient(600px 400px at 50% 60%,rgba(0,229,255,.08),transparent 70%),
+             linear-gradient(180deg,#0a1230,#05081a);
+    --card:rgba(120,170,255,.07);--card-hover:rgba(120,190,255,.13);--line:rgba(120,200,255,.16);
+    --text:#eaf6ff;--muted:rgba(190,220,255,.6);
+    --chip:rgba(120,170,255,.10);--chip-on-bg:var(--grad);--chip-on:#fff;
+    --bar:rgba(12,20,50,.55);
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+    --shadow-hover:0 12px 34px rgba(0,0,0,.5),0 0 0 1px rgba(0,229,255,.25);
+    --glow:0 0 0 1px rgba(0,229,255,.55),0 0 28px rgba(0,229,255,.35),0 16px 40px rgba(0,0,0,.5);
+    --stars:radial-gradient(1px 1px at 12% 18%,#fff8,transparent),radial-gradient(1px 1px at 72% 12%,#fff9,transparent),
+            radial-gradient(1.5px 1.5px at 38% 42%,#fff6,transparent),radial-gradient(1px 1px at 88% 36%,#fff7,transparent),
+            radial-gradient(1px 1px at 22% 72%,#fff6,transparent),radial-gradient(1.5px 1.5px at 62% 82%,#fff7,transparent),
+            radial-gradient(1px 1px at 92% 70%,#fff5,transparent),radial-gradient(1px 1px at 50% 8%,#fff6,transparent),
+            radial-gradient(1px 1px at 6% 50%,#fff5,transparent),radial-gradient(1px 1px at 80% 55%,#fff4,transparent);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,system-ui,"Helvetica Neue",Arial,sans-serif;
+    color:var(--text);background:var(--bg-img),var(--bg);background-attachment:fixed;min-height:100vh;overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{content:"";position:fixed;inset:0;background:var(--stars);background-size:420px 420px;pointer-events:none;z-index:0;opacity:.9}
+  svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+  .wrap{position:relative;z-index:1;max-width:980px;margin:0 auto;padding:max(36px,env(safe-area-inset-top)) 22px 150px}
+  .glass{background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+    backdrop-filter:blur(18px) saturate(150%);-webkit-backdrop-filter:blur(18px) saturate(150%)}
+
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+  .portal{font-size:.82rem;font-weight:500;color:var(--muted);margin-bottom:4px}
+  .hello{font-size:clamp(1.7rem,4.5vw,2.3rem);font-weight:600;letter-spacing:-.02em;line-height:1.15}
+  .date{color:var(--muted);margin-top:4px;font-size:.95rem}
+  .right{display:flex;align-items:center;gap:8px}
+  .clock{font-size:1.05rem;font-weight:500;padding:9px 14px;border-radius:10px;font-variant-numeric:tabular-nums}
+  .icon-btn{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;cursor:pointer;color:var(--text);transition:background .2s}
+  .icon-btn:hover{background:var(--card-hover)}
+
+  .clock{font-weight:700;color:var(--accent2)}
+  [data-theme="dark"] .clock{color:var(--accent);text-shadow:0 0 12px rgba(0,229,255,.6)}
+  .hello{background:linear-gradient(90deg,var(--text) 40%,var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  [data-theme="dark"] .hello{background-image:linear-gradient(90deg,#fff 35%,var(--accent))}
+
+  .section-title{font-size:.8rem;color:var(--muted);margin:0 0 12px 2px;font-weight:600}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-bottom:32px}
+  @media (max-width:420px){.grid{grid-template-columns:repeat(2,1fr);gap:10px}}
+
+  .tile{position:relative;border-radius:16px;padding:24px 14px 18px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    transition:transform .25s ease,box-shadow .25s ease,background .25s;animation:fade .35s ease backwards}
+  .tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+  .tile:active{transform:scale(.98)}
+  .tile-link{position:absolute;inset:0;border-radius:inherit;z-index:1}
+  .tile:hover{background:var(--card-hover);box-shadow:var(--glow)}
+  .tile-link:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}}
+
+  /* Ikon bulat berwarna dengan kilauan */
+  .app-icon{position:relative;width:64px;height:64px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;
+    background:radial-gradient(circle at 30% 25%,rgba(255,255,255,.55),transparent 45%),linear-gradient(140deg,var(--c1,#00e5ff),var(--c2,#2f7bff));
+    box-shadow:0 8px 22px -6px var(--c1,#00e5ff),inset 0 -4px 10px rgba(0,0,0,.18),inset 0 2px 2px rgba(255,255,255,.5);
+    transition:transform .25s ease}
+  .app-icon img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+  .app-icon svg{width:44%;height:44%;stroke-width:1.9;color:#fff;filter:drop-shadow(0 1px 1px rgba(0,0,0,.25))}
+  .tile:hover .app-icon{transform:scale(1.06)}
+  .name{font-weight:600;font-size:.95rem}
+  .desc{font-size:.78rem;color:var(--muted);line-height:1.35}
+
+  .badge{position:absolute;top:12px;left:12px;font-size:.6rem;font-weight:600;letter-spacing:.04em;padding:2px 8px;border-radius:999px;
+    background:linear-gradient(135deg,#ff4d8d,#ff9a3c);color:#fff;z-index:2;box-shadow:0 2px 10px rgba(255,77,141,.45)}
+  .act{position:absolute;top:9px;width:28px;height:28px;border-radius:8px;border:0;z-index:2;cursor:pointer;
+    display:grid;place-items:center;background:var(--chip);color:var(--muted);opacity:0;transition:opacity .2s,color .2s}
+  .act svg{width:14px;height:14px}
+  .act:hover{color:var(--text)}
+  .star{right:9px}.share{right:41px}
+  .tile:hover .act,.star.on{opacity:1}
+  .star.on{color:#ffcc33}
+  .star.on svg{fill:currentColor}
+  @media (hover:none){.act{opacity:.9}}
+
+  .empty{text-align:center;color:var(--muted);padding:40px 10px;border-radius:16px}
+
+  /* ---------- Paparan 3D Ring ---------- */
+  .stage{position:relative;height:330px;perspective:1000px;perspective-origin:50% 20%;touch-action:pan-y;
+    user-select:none;-webkit-user-select:none;cursor:grab;outline:none;overflow:hidden;margin:0 -22px}
+  .stage.dragging{cursor:grabbing}
+  .orbit{position:absolute;left:50%;top:var(--oy);width:var(--ow);height:var(--oh);transform:translate(-50%,-50%);border-radius:50%;
+    border:2px solid rgba(0,229,255,.55);pointer-events:none;
+    box-shadow:0 0 18px rgba(0,229,255,.45),inset 0 0 22px rgba(0,229,255,.25);
+    background:radial-gradient(ellipse at 50% 50%,rgba(0,229,255,.16),rgba(47,123,255,.06) 55%,transparent 72%)}
+  .orbit::after{content:"";position:absolute;inset:14%;border-radius:50%;border:1px dashed rgba(0,229,255,.3)}
+  .ring{position:absolute;left:50%;top:150px;width:0;height:0}
+  .orb{position:absolute;left:-60px;top:0;width:120px;height:146px;border-radius:22px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:0 8px;
+    text-decoration:none;color:var(--text);background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    will-change:transform,opacity;-webkit-user-drag:none;transition:box-shadow .3s,border-color .3s}
+  .orb .name{font-size:.85rem;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .orb .badge{top:8px;left:50%;transform:translateX(-50%)}
+  .orb.front{box-shadow:var(--glow);border-color:rgba(0,229,255,.6)}
+  .orb:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  .ring-info{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 14px}
+  .ri-text{text-align:center;min-width:0;flex:0 1 340px}
+  .ri-name{font-size:1.3rem;font-weight:600;letter-spacing:-.01em}
+  .ri-desc{color:var(--muted);font-size:.9rem;margin-top:2px}
+  .ri-actions{display:flex;justify-content:center;align-items:center;gap:8px;margin-bottom:14px}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:999px;font-weight:500;font-size:.92rem;
+    background:var(--grad);color:#fff;text-decoration:none;transition:filter .2s,transform .2s;
+    box-shadow:0 6px 22px rgba(0,180,255,.45)}
+  .btn:hover{filter:brightness(1.1);transform:translateY(-1px)}
+  .btn svg{width:15px;height:15px}
+  .icon-btn.on{color:#ffcc33}
+  .icon-btn.on svg{fill:currentColor}
+  .dots{display:flex;justify-content:center;gap:6px;margin-bottom:30px}
+  .dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .3s,width .3s}
+  [data-theme="dark"] .dots i{background:rgba(190,220,255,.22)}
+  .dots i.on{background:var(--grad);width:18px;border-radius:3px;box-shadow:0 0 10px rgba(0,229,255,.7)}
+  /* Mobile + paparan 3D: satu skrin penuh, tanpa skrol */
+  @media (max-width:700px){
+    body.ring-view{height:100dvh;overflow:hidden;overscroll-behavior:none}
+    .ring-view .wrap{height:100dvh;display:flex;flex-direction:column;
+      padding:max(14px,env(safe-area-inset-top)) 16px calc(108px + env(safe-area-inset-bottom))}
+    .ring-view header{flex-wrap:nowrap;align-items:center;margin-bottom:12px}
+    .ring-view .portal{font-size:.72rem;margin-bottom:2px}
+    .ring-view .hello{font-size:1.4rem}
+    .ring-view .date{font-size:.8rem;margin-top:2px}
+    .ring-view .clock{display:none}
+    .ring-view .icon-btn{width:36px;height:36px}
+    .ring-view .section-title,.ring-view footer{display:none}
+    .ring-view #content{flex:1;min-height:0;display:flex;flex-direction:column}
+    .ring-view .stage{flex:1;min-height:170px;height:auto;margin:0 -16px}
+    .ring-view .ring{top:calc(64% - 73px)}
+    .ring-view .ring-info{margin:0 0 8px}
+    .ring-view .ri-name{font-size:1.15rem}
+    .ring-view .ri-actions{margin-bottom:8px}
+    .ring-view .dots{margin-bottom:0}
+    .ring-view .empty{margin-top:10px}
+  }
+  @media (max-width:700px) and (max-height:620px){
+    .ring-view .date,.ring-view .portal{display:none}
+    .ring-view .orb{transform-origin:center;scale:.85}
+  }
+
+  .dock{position:fixed;bottom:max(14px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:5;
+    display:flex;align-items:flex-end;gap:10px;padding:8px 10px;border-radius:20px;max-width:calc(100% - 24px);overflow-x:auto;scrollbar-width:none;
+    background:var(--bar);border:1px solid var(--line);box-shadow:0 8px 30px rgba(0,0,0,.12);
+    backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%)}
+  .dock::-webkit-scrollbar{display:none}
+  .dock a{text-decoration:none;color:var(--text);display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;padding:2px}
+  .dock .app-icon{width:50px;height:50px;font-size:1.5rem;border-radius:12px;transition:transform .2s ease}
+  .dock a:hover .app-icon{transform:translateY(-6px) scale(1.08)}
+  .dock span{font-size:.66rem;font-weight:500;color:var(--muted);max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dock-empty{color:var(--muted);font-size:.85rem;padding:10px 8px;white-space:nowrap}
+
+  .toast{position:fixed;top:18px;left:50%;transform:translate(-50%,-120px);z-index:10;padding:10px 18px;border-radius:12px;font-weight:500;font-size:.9rem;
+    background:var(--bar);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);transition:transform .35s ease}
+  .toast.show{transform:translate(-50%,0)}
+  .install{display:none}
+  footer{text-align:center;color:var(--muted);font-size:.78rem}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div>
+        <div class="portal" id="portal"></div>
+        <h1 class="hello" id="hello">Selamat Datang</h1>
+        <div class="date" id="date"></div>
+      </div>
+      <div class="right">
+        <div class="clock glass" id="clock">--:--</div>
+        <button class="icon-btn glass install" id="installBtn" title="Pasang Portal"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></button>
+        <button class="icon-btn glass" id="viewBtn" title="Tukar paparan"></button>
+        <button class="icon-btn glass" id="themeBtn" title="Tukar tema"></button>
+      </div>
+    </header>
+
+    <section id="content"></section>
+    <footer id="footer"></footer>
+  </main>
+
+  <nav class="dock glass" id="dock"></nav>
+  <div class="toast glass" id="toast"></div>
+
+<script src="apps.js"></script>
+<script>
+  const $ = s => document.querySelector(s);
+  const LS = {
+    get: (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } },
+    set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+  };
+  const byId = id => APPS.find(a => a.id === id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+  let favs = LS.get("favs", APPS.filter(a => a.fav).map(a => a.id)).filter(byId);
+  let recent = LS.get("recent", []).filter(byId);
+
+  // Pintasan manifest: index.html?open=<id> terus buka app
+  const openParam = new URLSearchParams(location.search).get("open");
+  if (openParam && byId(openParam)) { markRecent(openParam); location.replace(byId(openParam).url); }
+
+  // ---------- Ikon garisan ----------
+  const SVG = {
+    sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>',
+    star: '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+    link: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+    ring: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="13" rx="9" ry="4"/><rect x="9" y="4" width="6" height="7" rx="1.5"/></svg>',
+    grid: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg>',
+    left: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+    right: '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>',
+    open: '<svg viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></svg>',
+  };
+
+  // ---------- Paparan: "ring" (3D) atau "grid" ----------
+  let view = LS.get("view", "ring");
+  const setView = v => {
+    view = v; LS.set("view", v);
+    $("#viewBtn").innerHTML = v === "ring" ? SVG.grid : SVG.ring;
+    $("#viewBtn").title = v === "ring" ? "Paparan grid" : "Paparan 3D";
+  };
+  setView(view);
+  $("#viewBtn").onclick = () => { setView(view === "ring" ? "grid" : "ring"); render(); };
+
+  // ---------- Tema ----------
+  const setTheme = t => {
+    document.documentElement.dataset.theme = t;
+    $("#themeBtn").innerHTML = t === "dark" ? SVG.sun : SVG.moon;
+    document.querySelector('meta[name="theme-color"]').content = t === "dark" ? "#0a1230" : "#eaf3ff";
+    LS.set("theme3d", t);
+  };
+  setTheme(LS.get("theme3d", "dark"));   // gaya launcher 3D: gelap secara lalai
+  $("#themeBtn").onclick = () => setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+
+  // ---------- Salam & jam ----------
+  $("#portal").textContent = PORTAL.title + (PORTAL.subtitle ? " · " + PORTAL.subtitle : "");
+  document.title = PORTAL.title;
+  function tick() {
+    const d = new Date(), h = d.getHours();
+    $("#hello").textContent =
+      h < 12 ? "Selamat Pagi" : h < 15 ? "Selamat Tengah Hari" : h < 19 ? "Selamat Petang" : "Selamat Malam";
+    $("#date").textContent = d.toLocaleDateString("ms-MY", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
+    $("#clock").textContent = d.toLocaleTimeString("ms-MY", { hour:"2-digit", minute:"2-digit", hour12:false });
+  }
+  tick(); setInterval(tick, 10000);
+
+  // ---------- Render ----------
+  // Ikon garisan monokrom untuk app (guna "glyph" dalam apps.js)
+  const GLYPH = {
+    book:   '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/><path d="M8 7h8M8 11h6"/>',
+    phone:  '<rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2M3 3l18 18"/>',
+    shield: '<path d="M12 2l8 3v6c0 5-3.4 9.3-8 11-4.6-1.7-8-6-8-11V5z"/><path d="M9 12l2 2 4-4"/>',
+    clock:  '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M5 3L2 6M19 3l3 3"/>',
+    scale:  '<path d="M12 3v18M7 21h10M5 7h14M12 5V3"/><path d="M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/>',
+    app:    '<rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/>',
+  };
+  const glyph = a => `<svg viewBox="0 0 24 24">${GLYPH[a.glyph] || GLYPH.app}</svg>`;
+  const icon = a => `<div class="app-icon"${a.colors ? ` style="--c1:${esc(a.colors[0])};--c2:${esc(a.colors[1] || a.colors[0])}"` : ""}>${
+    a.icon ? `<img src="${esc(a.icon)}" alt="" onerror="this.outerHTML=this.dataset.g" data-g='${glyph(a)}'>` : glyph(a)
+  }</div>`;
+
+  const tile = (a, i) => `
+    <div class="tile glass" style="animation-delay:${i * 40}ms">
+      <a class="tile-link" href="${esc(a.url)}" target="_blank" rel="noopener" data-open="${a.id}" aria-label="Buka ${esc(a.name)}"></a>
+      ${a.isNew ? '<span class="badge">Baru</span>' : ""}
+      <button class="act share" data-share="${a.id}" title="Kongsi pautan">${SVG.link}</button>
+      <button class="act star ${favs.includes(a.id) ? "on" : ""}" data-fav="${a.id}" title="Pin ke Dock">${SVG.star}</button>
+      ${icon(a)}
+      <div class="name">${esc(a.name)}</div>
+      <div class="desc">${esc(a.desc)}</div>
+    </div>`;
+
+  function render() {
+    const list = APPS;
+    let html = "";
+    if (view === "grid" && recent.length) {
+      html += `<h2 class="section-title">Baru Digunakan</h2><div class="grid">${recent.slice(0, 4).map(byId).map(tile).join("")}</div>`;
+    }
+    html += !list.length
+      ? `<div class="empty glass">Tiada aplikasi</div>`
+      : view === "ring" ? ringHTML(list) : `<div class="grid">${list.map(tile).join("")}</div>`;
+    document.body.classList.toggle("ring-view", view === "ring");
+    $("#content").innerHTML = html;
+    $("#footer").textContent = view === "ring"
+      ? `${APPS.length} aplikasi · Seret, skrol atau tekan ← → untuk pusing`
+      : `${APPS.length} aplikasi · Tekan bintang untuk pin ke Dock`;
+    renderDock();
+    if (view === "ring" && list.length) mountRing(list); else R.els = [];
+  }
+
+  // ---------- 3D Ring ----------
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const R = { angle: 0, vel: 0, target: null, idle: 0, list: [], els: [], step: 360, r: 200, front: -1, drag: null, suppress: false, raf: 0, key: "" };
+
+  const ringHTML = list => `
+    <div class="stage" id="stage" tabindex="0" aria-label="Pelancar 3D. Seret atau tekan anak panah untuk pusing, Enter untuk buka">
+      <div class="orbit" id="orbit"></div>
+      <div class="ring">${list.map((a, i) => `
+        <a class="orb" href="${esc(a.url)}" target="_blank" rel="noopener" draggable="false" data-i="${i}" aria-label="${esc(a.name)}">
+          ${a.isNew ? '<span class="badge">Baru</span>' : ""}${icon(a)}<div class="name">${esc(a.name)}</div>
+        </a>`).join("")}
+      </div>
+    </div>
+    <div class="ring-info">
+      <button class="icon-btn glass" data-step="-1" title="Sebelum">${SVG.left}</button>
+      <div class="ri-text"><div class="ri-name" id="riName"></div><div class="ri-desc" id="riDesc"></div></div>
+      <button class="icon-btn glass" data-step="1" title="Seterusnya">${SVG.right}</button>
+    </div>
+    <div class="ri-actions">
+      <a class="btn" id="riOpen" target="_blank" rel="noopener">Buka ${SVG.open}</a>
+      <button class="icon-btn glass" id="riFav" title="Pin ke Dock">${SVG.star}</button>
+      <button class="icon-btn glass" id="riShare" title="Kongsi pautan">${SVG.link}</button>
+    </div>
+    <div class="dots" id="dots">${list.map(() => "<i></i>").join("")}</div>`;
+
+  function mountRing(list) {
+    const key = list.map(a => a.id).join();
+    if (key !== R.key) { R.key = key; R.angle = 0; R.target = null; R.vel = 0; pause(5000); }   // senarai berubah → mula dari app pertama
+    R.list = list;
+    R.els = [...document.querySelectorAll(".orb")];
+    R.step = 360 / list.length;
+    const w = $("#stage").clientWidth, n = list.length;
+    const need = n > 2 ? 150 / (2 * Math.tan(Math.PI / n)) : 0;          // jarak supaya kad tak bertindih
+    R.r = Math.round(Math.max(need, Math.min(270, Math.max(125, w * 0.3))));
+    const o = $("#orbit").style, top = parseFloat(getComputedStyle($(".ring")).top);
+    o.setProperty("--ow", R.r * 2 + 160 + "px");
+    o.setProperty("--oh", R.r * 0.5 + 50 + "px");
+    o.setProperty("--oy", top + 150 - R.r * 0.12 + "px");
+    R.front = -1;
+    if (R.target == null) R.target = Math.round(R.angle / R.step) * R.step;
+    bindStage();
+    draw();
+    if (!R.raf) R.raf = requestAnimationFrame(loop);
+  }
+
+  // Kedudukan setiap kad: bulatan mendatar, kad sentiasa menghadap pengguna
+  function draw() {
+    let best = 0, bestD = 1e9;
+    R.els.forEach((el, i) => {
+      const eff = (((i * R.step - R.angle) % 360) + 540) % 360 - 180;     // -180..180, 0 = depan
+      const rad = eff * Math.PI / 180, c = Math.cos(rad);
+      const x = R.r * Math.sin(rad), z = R.r * (c - 1), y = (c - 1) * R.r * 0.2;
+      el.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,${z.toFixed(1)}px) rotateY(${(eff * 0.35).toFixed(1)}deg)`;
+      el.style.zIndex = 1000 + Math.round(z);
+      el.style.opacity = (0.22 + 0.78 * ((c + 1) / 2) ** 1.6).toFixed(3);
+      el.style.pointerEvents = c < -0.2 ? "none" : "";
+      if (Math.abs(eff) < bestD) { bestD = Math.abs(eff); best = i; }
+    });
+    if (best !== R.front) {
+      R.front = best;
+      R.els.forEach((el, i) => { el.classList.toggle("front", i === best); el.tabIndex = i === best ? 0 : -1; });
+      renderInfo();
+    }
+  }
+
+  function renderInfo() {
+    const a = R.list[R.front]; if (!a) return;
+    $("#riName").textContent = a.name;
+    $("#riDesc").textContent = a.desc || "";
+    const open = $("#riOpen"); open.href = a.url; open.dataset.open = a.id;
+    const fav = $("#riFav"); fav.dataset.fav = a.id; fav.classList.toggle("on", favs.includes(a.id));
+    $("#riShare").dataset.share = a.id;
+    [...$("#dots").children].forEach((d, i) => d.classList.toggle("on", i === R.front));
+  }
+
+  function loop() {
+    R.raf = 0;
+    if (!R.els.length || !document.contains(R.els[0])) return;          // ring tiada di skrin → henti
+    const now = performance.now();
+    if (R.drag) {
+      // sudut dikawal oleh seretan
+    } else if (Math.abs(R.vel) > 0.4) {                                 // inersia selepas lepas
+      R.angle += R.vel; R.vel *= 0.93;
+    } else if (R.target != null) {                                      // anjal ke kad terdekat
+      R.vel = 0;
+      const d = R.target - R.angle;
+      R.angle += reduceMotion ? d : d * 0.12;
+      if (Math.abs(d) < 0.05) { R.angle = R.target; R.target = null; }
+    } else if (!R.vel && R.list.length > 1 && !reduceMotion && now > R.idle) {
+      step(1); R.idle = now + 4000;                                      // pusing sendiri bila tak diusik
+    }
+    if (!R.drag && R.vel && Math.abs(R.vel) <= 0.4) { R.vel = 0; R.target = Math.round(R.angle / R.step) * R.step; }
+    draw();
+    R.raf = requestAnimationFrame(loop);
+  }
+
+  const pause = (ms = 7000) => { R.idle = performance.now() + ms; };
+  function step(d) {
+    const base = R.target ?? Math.round(R.angle / R.step) * R.step;
+    R.vel = 0; R.target = base + d * R.step;
+  }
+  function goTo(i) {
+    const diff = (((i * R.step - R.angle) % 360) + 540) % 360 - 180;
+    R.vel = 0; R.target = R.angle + diff; pause();
+  }
+
+  function bindStage() {
+    const st = $("#stage");
+    if (st._bound) return; st._bound = true;
+    st.addEventListener("pointerdown", e => {
+      if (e.button) return;
+      R.drag = { x: e.clientX, lx: e.clientX, a: R.angle, moved: false, id: e.pointerId };
+      R.vel = 0; R.target = null; pause();
+    });
+    st.addEventListener("pointermove", e => {
+      const d = R.drag; if (!d) return;
+      const dx = e.clientX - d.x, k = R.step / 170;
+      if (!d.moved && Math.abs(dx) > 6) { d.moved = true; st.setPointerCapture(d.id); st.classList.add("dragging"); }
+      if (!d.moved) return;
+      R.angle = d.a - dx * k;
+      R.vel = -(e.clientX - d.lx) * k; d.lx = e.clientX;
+    });
+    const end = () => {
+      const d = R.drag; if (!d) return;
+      R.drag = null; st.classList.remove("dragging"); pause();
+      R.suppress = d.moved;
+      if (!d.moved || Math.abs(R.vel) <= 0.4) { R.vel = 0; R.target = Math.round(R.angle / R.step) * R.step; }
+      else R.vel = Math.max(-25, Math.min(25, R.vel));
+    };
+    st.addEventListener("pointerup", end);
+    st.addEventListener("pointercancel", end);
+    st.addEventListener("click", e => {
+      if (R.suppress) { R.suppress = false; e.preventDefault(); e.stopPropagation(); return; }
+      const orb = e.target.closest(".orb"); if (!orb) return;
+      const i = +orb.dataset.i;
+      if (i !== R.front) { e.preventDefault(); goTo(i); return; }      // kad tepi → pusing ke depan dulu
+      markRecent(R.list[i].id);
+    }, true);
+    let wheelAt = 0;
+    st.addEventListener("wheel", e => {
+      const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (!d) return;
+      e.preventDefault();
+      if (performance.now() - wheelAt < 260) return;
+      wheelAt = performance.now(); step(Math.sign(d)); pause();
+    }, { passive: false });
+  }
+
+  addEventListener("resize", () => { if (view === "ring" && R.els.length) mountRing(R.list); });
+
+  function renderDock() {
+    $("#dock").innerHTML = favs.length
+      ? favs.map(byId).map(a => `<a href="${esc(a.url)}" target="_blank" rel="noopener" data-open="${a.id}" title="${esc(a.name)}">${icon(a)}<span>${esc(a.name)}</span></a>`).join("")
+      : `<div class="dock-empty">Tekan bintang pada app untuk pin di sini</div>`;
+  }
+
+  // ---------- Interaksi ----------
+  function markRecent(id) {
+    recent = [id, ...LS.get("recent", []).filter(x => x !== id)].slice(0, 8);
+    LS.set("recent", recent);
+  }
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+    clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 2000);
+  }
+
+  document.addEventListener("click", async e => {
+    const el = e.target.closest("[data-open],[data-fav],[data-share],[data-step]");
+    if (!el) return;
+    if (el.dataset.step) { step(+el.dataset.step); pause(); return; }
+    if (el.dataset.open) { markRecent(el.dataset.open); setTimeout(render, 300); return; }
+    e.preventDefault();
+    if (el.dataset.fav) {
+      const id = el.dataset.fav;
+      const on = favs.includes(id);
+      favs = on ? favs.filter(x => x !== id) : [...favs, id];
+      LS.set("favs", favs);
+      toast(on ? "Dibuang dari Dock" : "Dipin ke Dock");
+      render();
+    }
+    if (el.dataset.share) {
+      const a = byId(el.dataset.share);
+      try {
+        if (navigator.share) await navigator.share({ title: a.name, url: a.url });
+        else { await navigator.clipboard.writeText(a.url); toast("Pautan disalin"); }
+      } catch {}
+    }
+  });
+
+  document.addEventListener("keydown", e => {
+    if (view === "ring" && R.els.length && (e.key === "ArrowLeft" || e.key === "ArrowRight")) {
+      e.preventDefault(); step(e.key === "ArrowRight" ? 1 : -1); pause();
+    }
+  });
+
+  // ---------- PWA: pasang & service worker ----------
+  let deferred;
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; $("#installBtn").style.display = "grid"; });
+  $("#installBtn").onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $("#installBtn").style.display = "none"; };
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js");
+
+  render();
+</script>
+</body>
+</html>
