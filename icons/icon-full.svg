@@ -1,0 +1,26 @@
+<!-- Ikon penuh (tiada bucu bulat, tiada lutsinar) untuk iOS & Android maskable.
+     Reka bentuk diletak dalam zon selamat tengah supaya tidak terpotong. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1a44"/><stop offset="1" stop-color="#05081a"/>
+    </linearGradient>
+    <radialGradient id="glowbg" cx=".3" cy=".1" r=".8">
+      <stop offset="0" stop-color="#00aaff" stop-opacity=".35"/><stop offset="1" stop-color="#00aaff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="n" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00e5ff"/><stop offset="1" stop-color="#2f7bff"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="8"/></filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#glowbg)"/>
+  <g id="art" transform="translate(256 256) scale(SCALE) translate(-256 -266)">
+    <ellipse cx="256" cy="300" rx="180" ry="62" fill="none" stroke="#00e5ff" stroke-width="10" opacity=".55" filter="url(#glow)"/>
+    <ellipse cx="256" cy="300" rx="180" ry="62" fill="none" stroke="url(#n)" stroke-width="8"/>
+    <circle cx="256" cy="232" r="72" fill="url(#n)"/>
+    <circle cx="232" cy="208" r="26" fill="#fff" opacity=".45"/>
+    <circle cx="118" cy="262" r="34" fill="#7c4dff" opacity=".9"/>
+    <circle cx="394" cy="262" r="34" fill="#ff4d6d" opacity=".9"/>
+  </g>
+</svg>

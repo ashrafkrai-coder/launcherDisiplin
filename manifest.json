@@ -2,7 +2,9 @@
   "name": "Portal Aplikasi",
   "short_name": "Portal",
   "description": "Pelancar semua aplikasi sekolah",
+  "id": "./index.html",
   "start_url": "./index.html",
+  "orientation": "portrait",
   "scope": "./",
   "display": "standalone",
   "background_color": "#060a1c",
@@ -10,8 +12,9 @@
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
-    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ],
   "shortcuts": [
     { "name": "myDisiplin", "url": "./index.html?open=mydisiplin" },
